@@ -38,6 +38,6 @@ document.addEventListener("readystatechange", e => {
 			ctx.putImageData(imageData, 0, 0);
 
 		};
-		image.src = "images/qoi_logo.png";
+		image.src = "images/wikipedia_008.png";
 	}
 });

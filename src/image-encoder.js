@@ -1,8 +1,6 @@
 import encode from "./huffman-encoder.js";
 import config from "./config.js";
 
-const toBinString = bytes => bytes.reduce((str, byte) => str + byte.toString(2).padStart(8, "0"), "");
-
 export default (width, height, image, meta = {}) => {
 
 	// build meta data string first
@@ -51,7 +49,6 @@ export default (width, height, image, meta = {}) => {
 		}
 		last = pixel;
 	}
-	console.log(data);
 
 	// huffman encode the compressed data
 	const huffman = encode(data),

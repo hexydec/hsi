@@ -106,7 +106,6 @@ export default data => {
 				}, [])
 			)
 		];
-	console.log(toBinString(output[0]), output[0].length);
 
 	// add the bytes
 	const bytes = new Uint8ClampedArray(output.reduce((size, item) => size + item.length, 0));

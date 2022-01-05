@@ -2,8 +2,6 @@ import config from "./config.js";
 import decode from "./huffman-decoder.js";
 import hash from "./index-hash.js";
 
-const toBinString = bytes => bytes.reduce((str, byte) => str + byte.toString(2).padStart(8, "0"), "");
-
 export default hsi => {
 	const len = hsi.length;
 	if (len > 12) {
@@ -42,7 +40,6 @@ export default hsi => {
 				pixelsize = image.width * image.height,
 				pixels = new Uint8ClampedArray(pixelsize * 4), // one byte each for RGBA
 				index = new Array(256);
-				console.log(bytes);
 			offset = 0;
 
 			// set index 0 to white
