@@ -27,7 +27,6 @@ document.addEventListener("readystatechange", e => {
 			const data = context.getImageData(0, 0, image.width, image.height),
 				encoded = encode(data.width, data.height, data.data),
 				decoded = decode(encoded);
-			console.log(data.data, decoded.data);
 
 			// display the decoded image
 			const output = document.querySelector(".hsi__output"),

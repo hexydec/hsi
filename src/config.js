@@ -3,5 +3,6 @@ export default {
 	commands: [ // the byte lengths for each command
 		3, // HSI_OP_RGB
 		4, // HSI_OP_RGBA
+		1 // HSI_OP_INDEX
 	]
 };

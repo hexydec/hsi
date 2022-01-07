@@ -1,20 +1,7 @@
 import getBytes from "./get-bytes.js";
 
-// get the min occurences from each value in the data
-const getMin = data => {
-	let min = null,
-		i = 0,
-		len = data.length;
-	for (; i < len; i++) {
-		if (min === null || data[min].count > data[i].count) {
-			min = i;
-		}
-	}
-	return min;
-},
-
 // index the unique values noting their tree position and huffman code
-getIndex = (tree, code = [], index = [], n = 0) => {
+const getIndex = (tree, code = [], index = [], n = 0) => {
 	let data = {};
 	for (let i = 0, len = tree.length; i < len; i++) {
 		const val = tree[i].nodes === undefined ? 1 : 0;
@@ -43,6 +30,7 @@ export default data => {
 		bits = 1;
 
 	// get the unique values from the data and count occurences
+	console.time("Create Tree");
 	for (; i < len; i++) {
 
 		// count the value
@@ -62,25 +50,47 @@ export default data => {
 		}
 		tree[cache[key]].count++;
 	}
+	console.timeEnd("Create Tree");
 
 	// build the tree
-	while (tree.length > 2) {
-		const min1 = getMin(tree),
-			value1 = tree[min1];
-		tree.splice(min1, 1);
-		const min2 = getMin(tree),
-			value2 = tree[min2];
-		tree.splice(min2, 1);
-		tree.push({
-			count: value1.count + value2.count,
-			nodes: [value1, value2]
-		});
+	console.time("Order Tree");
+	tree.sort((a, b) => a.count - b.count);
+	len = tree.length;
+	while (len > 2) {
+
+		// chop off the lowest (top) two items
+		const min = tree.splice(0, 2);
+		const count = min.reduce((count, item) => count + item.count, 0),
+			obj = {
+				count: count,
+				nodes: min
+			};
+
+		// splice into position
+		if (tree.every((item, i) => {
+			if (item.count >= count) {
+				tree.splice(i, 0, obj);
+				return false;
+			}
+			return true;
+		})) {
+
+			// push onto the end
+			tree.push(obj);
+		}
+		len--;
 	}
+	console.timeEnd("Order Tree");
 
 	// index the data
+	console.time("Index Tree");
 	const index = getIndex(tree),
-		keys = Object.keys(index),
-		output = [
+		keys = Object.keys(index);
+	console.timeEnd("Index Tree");
+
+	// compile the bytecode
+	console.time("Compile Data Streams");
+	const output = [
 
 			// build the tree index
 			getBytes(
@@ -106,12 +116,15 @@ export default data => {
 				}, [])
 			)
 		];
+	console.timeEnd("Compile Data Streams");
 
 	// add the bytes
+	console.time("Compile Bytecode");
 	const bytes = new Uint8ClampedArray(output.reduce((size, item) => size + item.length, 0));
 	output.reduce((offset, item) => {
 		bytes.set(item, offset);
 		return offset + item.length;
 	}, 0);
+	console.timeEnd("Compile Bytecode");
 	return bytes;
 }

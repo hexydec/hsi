@@ -71,23 +71,30 @@ export default (data, cmdlen = 0) => {
 	// decode the huffman stream
 	let output = [],
 		outputlen = 0,
-		id = "";
+		id = "",
+		block = 65536,
+		bytes = new Uint8ClampedArray(block),
+		offset = 0;
 	for (const len = data.length; byte < len; byte++) {
 		for (let i = 7; i >= 0; i--) {
 			id += getBit(data[byte], i);
-			if (index[id] !== undefined) {
-				output.push(index[id]);
-				outputlen += index[id].length;
+			const item = index[id];
+			if (item !== undefined) {
+				const dlen = item.length;
+
+				// check size
+				if (offset + dlen > block) {
+					block *=2;
+					const next = new Uint8ClampedArray(block);
+					next.set(bytes);
+					bytes = next;
+				}
+
+				bytes.set(item, offset);
+				offset += dlen;
 				id = "";
 			}
 		}
 	}
-
-	// compile into byte stream
-	const bytes = new Uint8ClampedArray(outputlen);
-	output.reduce((offset, item) => {
-		bytes.set(item, offset);
-		return offset + item.length;
-	}, 0);
 	return bytes;
 };

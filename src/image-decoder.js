@@ -5,6 +5,7 @@ import hash from "./index-hash.js";
 export default hsi => {
 	const len = hsi.length;
 	if (len > 12) {
+		console.time("Decode Header");
 
 		// check magic bytes
 		for (let i = 0, len = config.magic.length; i < len; i++) {
@@ -34,15 +35,19 @@ export default hsi => {
 				}, {});
 				offset += header;
 			}
+			console.timeEnd("Decode Header");
 
 			// decode the huffman code
+			console.time("Decode Huffman Stream");
 			const bytes = decode(hsi.slice(offset), 1),
 				pixelsize = image.width * image.height,
 				pixels = new Uint8ClampedArray(pixelsize * 4), // one byte each for RGBA
 				index = new Array(256);
 			offset = 0;
+			console.timeEnd("Decode Huffman Stream");
 
 			// set index 0 to white
+			console.time("Decode Packed Data");
 			index[0] = [255, 255, 255, 255];
 
 			// setup tracking vars
@@ -53,14 +58,17 @@ export default hsi => {
 			for (; i < pixelsize;) {
 				const command = bytes[offset++];
 
-				// QOI_OP_INDEX
+				// HSI_OP_RGB / HSI_OP_RGBA
 				if (command < 2) {
 					pixel = [bytes[offset], bytes[offset + 1], bytes[offset + 2], command ? bytes[offset + 3] : pixel[3]];
 					offset += command ? 4 : 3;
+					const key = (bytes[offset] * 3 + bytes[offset + 1] * 5 + bytes[offset + 2] * 7 + bytes[offset + 3] * 11) % 256;
+					index[key] = pixel;
 
-				// } else if (command === 2) {
-				// 	pixel = index[hsi[offset++]];
-				//
+				// HSI_OP_INDEX
+				} else if (command === 2) {
+					pixel = index[hsi[offset++]];
+
 				// // QOI_OP_DIFF
 				// } else if (command === 1) {
 				// 	pixel = [pixel[0] + ((byte >> 4) - 4 - 2), pixel[1] + ((byte >> 2 & 3) - 2), pixel[2] + (byte & 3) - 2, pixel[3]];
@@ -95,6 +103,7 @@ export default hsi => {
 				// add to the data
 				pixels.set(pixel, 4 * i++);
 			}
+			console.timeEnd("Decode Packed Data");
 
 			// check output size is what is expected
 			// if (offset !== len - 8) {
