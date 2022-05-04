@@ -1,12 +1,6 @@
 import getBytes from "./get-bytes.js";
 import config from "./config.js";
-
-// extract the bit value
-const getBit = (byte, bit) => {
-	const bitmask = 1 << bit,
-		left = byte & bitmask;
-	return left >>> bit;
-};
+import getBit from "./get-bit.js";
 
 export default (data, cmdlen = 0) => {
 
@@ -23,7 +17,7 @@ export default (data, cmdlen = 0) => {
 				cmd = [];
 
 			// increment the bits and bytes
-			for (let n = 0; n <= val ? cmdlen : 0; n++) {
+			for (let n = 0; n <= (val ? cmdlen : 0); n++) {
 
 				// get the command bits
 				if (n) {
@@ -45,7 +39,7 @@ export default (data, cmdlen = 0) => {
 					id: bits.join("") + i
 				});
 			} else {
-				commands = commands.concat(getTree(data, bits.concat(i)));
+				commands.push(...getTree(data, bits.concat(i)));
 			}
 		}
 		return commands;

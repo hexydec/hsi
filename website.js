@@ -24,9 +24,13 @@ document.addEventListener("readystatechange", e => {
 			context.drawImage(image, 0, 0);
 
 			// encode the image
-			const data = context.getImageData(0, 0, image.width, image.height),
-				encoded = encode(data.width, data.height, data.data),
-				decoded = decode(encoded);
+			const data = context.getImageData(0, 0, image.width, image.height);
+			console.time("Encode Image");
+			const encoded = encode(data.width, data.height, data.data);
+			console.timeEnd("Encode Image");
+			console.time("Decode Image");
+			const decoded = decode(encoded);
+			console.timeEnd("Decode Image");
 
 			// display the decoded image
 			const output = document.querySelector(".hsi__output"),
@@ -37,6 +41,6 @@ document.addEventListener("readystatechange", e => {
 			ctx.putImageData(imageData, 0, 0);
 
 		};
-		image.src = "images/wikipedia_008.png";
+		image.src = "images/dice.png";
 	}
 });
